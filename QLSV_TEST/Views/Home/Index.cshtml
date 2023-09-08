@@ -1,0 +1,304 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+
+<style>
+
+    .flex-form {
+        display: flex;
+    }
+
+        .flex-form > div {
+            margin-left: 10px;
+            width: 50%;
+        }
+
+            .flex-form > div > input {
+                width: 100%;
+            }
+
+    .btn-primary {
+        margin-left: 10px;
+    }
+
+    .button {
+        background-color: blue;
+        border: 1px solid blue;
+        color: white;
+        border-radius: 3px;
+        margin-left: 10px;
+        padding: 5px 10px;
+    }
+</style>
+
+<h2>Thêm nhân viên</h2>
+
+<form id="form1" style="width: 50%;">
+    <div class="flex-form">
+        <div class="form-group">
+            <label asp-for="Code">Mã Nhân viên:</label>
+            <input asp-for="Code" name="EmployeeCode" class="form-control code" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="Email">Email:</label>
+            <input asp-for="Email" type="email" class="form-control email" required />
+        </div>
+    </div>
+
+    <div class="flex-form">
+        <div class="form-group">
+            <label asp-for="Name">Tên Nhân viên:</label>
+            <input asp-for="Name" class="form-control EmployeeName" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="Card">CMND:</label>
+            <input asp-for="Card" class="form-control IdentifyCardNo" required />
+        </div>
+    </div>
+
+    <div class="flex-form">
+        <div class="form-group">
+            <label asp-for="BirthDate">Ngày sinh:</label>
+            <input asp-for="BirthDate" type="date" class="form-control Birthday" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="IssueDate">Ngày cấp:</label>
+            <input asp-for="IssueDate" type="date" class="form-control IdentifyDate" required />
+        </div>
+    </div>
+
+    <div class="flex-form">
+        <div class="form-group">
+            <label asp-for="Name">Điện thoại:</label>
+            <input asp-for="Name" class="form-control Phone" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="PlaceOfIssue">Nơi cấp:</label>
+            <input asp-for="PlaceOfIssue" class="form-control IndentifyPlace" required />
+        </div>
+    </div>
+    <div class="flex-form">
+        <div class="form-group">
+            <label asp-for="Name">Địa chỉ:</label>
+            <input asp-for="Name" class="form-control Address" required />
+        </div>
+    </div>
+    <div class="flex-form">
+        <button class="button" id="btnAdd" style="margin-left: auto; ">Lưu</button>
+        <button id="btnReset" class="button">Làm lại</button>
+    </div>
+
+</form>
+
+<div>
+    @*<table class="table" style="margin-top: 10px">
+            <thead>
+                <tr>
+                    <th>Mã Nhân viên</th>
+                    <th>Email</th>
+                    <th>Tên Nhân viên</th>
+                    <th>CMND</th>
+                    <th>Ngày sinh</th>
+                    <th>Ngày cấp</th>
+                    <th>Điện thoại</th>
+                    <th>Nơi cấp</th>
+                    <th>Địa chỉ</th>
+                    <th></th>
+                </tr>
+
+            </thead>
+            <tbody>
+                @foreach (var employee in ViewBag.Employees)
+                {
+                    <tr>
+                        <td>@employee.EmployeeID</td>
+                        <td>@employee.Email</td>
+                        <td>@employee.EmployeeName</td>
+                        <td>@employee.IdentifyCardNo</td>
+                        <td>@employee.Birthday</td>
+                        <td>@employee.IdentifyDate</td>
+                        <td>@employee.Phone</td>
+                        <td>@employee.IndentifyPlace</td>
+                        <td>@employee.Address</td>
+                        <td class="update"> <i class="fa-solid fa-pen" style="color: #1655c0;"></i></td>
+                        <td class="delete"><i class="fa-solid fa-trash" style="color:red"></i></td>
+                    </tr>
+                }
+            </tbody>
+        </table>*@
+
+
+
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        // Check EmployeeId Exitst
+        function checkEmployeeIDExists(employeeID, callback) {
+            $.ajax({
+                type: "POST",
+                url: "/Home/CheckEmployeeIDExists",
+                data: { employeeID: employeeID },
+                success: function (data) {
+                    callback(data);
+                },
+                error: function (error) {
+                    // Xử lý lỗi (nếu cần)
+                    console.error("Đã xảy ra lỗi: " + error);
+                    callback(false);
+                }
+            });
+        }
+
+        // ChangeTime
+        function changeTime(daytime) {
+            // Tạo một đối tượng Date từ chuỗi
+            let birthdayDate = new Date(daytime);
+
+            // Lấy thông tin về ngày, tháng và năm
+            let year = birthdayDate.getFullYear();
+            let month = (birthdayDate.getMonth() + 1).toString().padStart(2, '0'); // Cộng 1 vì tháng trong JavaScript tính từ 0
+            let day = birthdayDate.getDate().toString().padStart(2, '0');
+
+            // Tạo định dạng yyyy-MM-dd
+            let formattedBirthday = year + '-' + month + '-' + day;
+            return formattedBirthday;
+        }
+
+        // Reset form
+        $("#btnReset").click(function (e) {
+            $(".code").text("");
+            $(".email").text("");
+            $(".EmployeeName").text("");
+            $(".IdentifyCardNo").text("");
+            $(".Birthday").text("");
+            $(".Phone").text("");
+            $(".IdentifyDate").text("");
+            $(".IndentifyPlace").text("");
+            $(".Address").text("");
+        });
+
+        // Click add or update
+        $("#btnAdd").click(function (e) {
+
+            let hasEmptyRequiredField = false;
+
+            // Lặp qua các trường input bắt buộc
+            $(".form-control[required]").each(function () {
+                if ($.trim($(this).val()) === "") {
+                    hasEmptyRequiredField = true;
+                    return false;
+                }
+            });
+
+            if (hasEmptyRequiredField) {
+                alert("Vui lòng điền đầy đủ các trường bắt buộc.");
+            } else {
+                let employeeID = $(".code").val();
+
+                // Kiểm tra xem EmployeeID đã tồn tại hay không
+                checkEmployeeIDExists(employeeID, function (exists) {
+
+                    let formData = {
+                        EmployeeID: $(".code").val(),
+                        Email: $(".email").val(),
+                        EmployeeName: $(".EmployeeName").val(),
+                        IdentifyCardNo: $(".IdentifyCardNo").val(),
+                        Birthday: $(".Birthday").val(),
+                        Phone: $(".Phone").val(),
+                        IdentifyDate: $(".IdentifyDate").val(),
+                        IndentifyPlace: $(".IndentifyPlace").val(),
+                        Address: $(".Address").val(),
+                    };
+
+                    if (exists) {
+                        $.ajax({
+                            type: "POST",
+                            url: "/Home/Put",
+                            data: formData,
+
+                        });
+
+                        alert("Sửa thành công!");
+                        location.reload();
+                    } else {
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/Home/Add",
+                            data: formData,
+                        });
+
+                        alert("Thêm thành công!");
+                        location.reload();
+                    }
+
+
+                    $('#btnReset')
+                        .removeAttr('disabled')
+                        .css('opacity', '');
+
+                });
+            }
+        });
+
+        // Delete action
+        $('.table').on('click', 'td.delete', function () {
+            // Lấy EmployeeID từ cùng hàng (row)
+            var employeeID = $(this).closest('tr').find('td:eq(0)').text();
+
+            // Gửi yêu cầu AJAX để xóa nhân viên bằng EmployeeID
+            $.ajax({
+                type: 'POST',
+                url: "/Home/Delete",
+                data: { employeeID: employeeID },
+            });
+
+            alert("Xoá thành công!");
+            location.reload();
+        });
+
+        // Update
+        $(document).ready(function () {
+            $('.table').on('click', 'td.update', function () {
+
+                $('#btnReset')
+                    .prop('disabled', true)
+                    .css('opacity', '0.5');
+
+                // Lấy EmployeeID từ cùng hàng (row)
+                let employeeID = $(this).closest('tr').find('td:eq(0)').text();
+                let Email = $(this).closest('tr').find('td:eq(1)').text();
+                let EmployeeName = $(this).closest('tr').find('td:eq(2)').text();
+                let IdentifyCardNo = $(this).closest('tr').find('td:eq(3)').text();
+                let Birthday = $(this).closest('tr').find('td:eq(4)').text();
+                let IdentifyDate = $(this).closest('tr').find('td:eq(5)').text();
+                let Phone = $(this).closest('tr').find('td:eq(6)').text();
+                let IndentifyPlace = $(this).closest('tr').find('td:eq(7)').text();
+                let Address = $(this).closest('tr').find('td:eq(8)').text();
+
+                // Chuỗi ban đầu
+                let birthdayString = changeTime(Birthday)
+                let IdentifyDateString = changeTime(IdentifyDate)
+
+                $(".code").val(employeeID);
+                $(".email").val(Email);
+                $(".EmployeeName").val(EmployeeName);
+                $(".IdentifyCardNo").val(IdentifyCardNo);
+                $(".Birthday").val(birthdayString);
+                $(".Phone").val(Phone);
+                $(".IdentifyDate").val(IdentifyDateString);
+                $(".IndentifyPlace").val(IndentifyPlace);
+                $(".Address").val(Address);
+
+            });
+        });
+
+    });
+
+</script>
